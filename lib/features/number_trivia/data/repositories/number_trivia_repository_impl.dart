@@ -11,7 +11,7 @@ import 'package:tdd_test/features/number_trivia/domain/entities/number_trivia_en
 import 'package:tdd_test/features/number_trivia/domain/repositories/number_trivia_repository.dart';
 
 
-typedef Future<NumberTriviaEntity> _ConcreteOrRandomChooser();
+typedef Future<NumberTriviaModel> _ConcreteOrRandomChooser();
 
 class NumberTriviaRepositoryImpl  implements NumberTriviaRepository{
 
@@ -26,15 +26,18 @@ class NumberTriviaRepositoryImpl  implements NumberTriviaRepository{
         required this.networkInfo});
 
   @override
-  Future<Either<Failure, NumberTriviaEntity>> getConcreteNumberTrivia(int number)  {
+  Future<Either<Failure, NumberTriviaEntity>> getConcreteNumberTrivia(int number) async {
 
+    return _getTrivia(() => remoteDataSource.getConcreteNumberTrivia(number));
 
-    throw UnimplementedError();
   }
 
   @override
-  Future<Either<Failure, NumberTriviaEntity>> getRandomNumberTrivia() {
-    throw UnimplementedError();
+  Future<Either<Failure, NumberTriviaEntity>> getRandomNumberTrivia() async {
+
+    return await _getTrivia( (){
+      return remoteDataSource.getRandomNumberTrivia();
+    } );
   }
 
 
@@ -45,7 +48,7 @@ class NumberTriviaRepositoryImpl  implements NumberTriviaRepository{
 
       try{
         final remoteTrivia = await concreteOrRandomChooser();
-        localDataSource.cacheNumberTrivia(remoteTrivia as NumberTriviaModel);
+        localDataSource.cacheNumberTrivia(remoteTrivia);
         return Right(remoteTrivia);
 
       }on ServerException{
@@ -65,11 +68,5 @@ class NumberTriviaRepositoryImpl  implements NumberTriviaRepository{
 
     }
   }
-
-
-
-
-
-
 
 }
